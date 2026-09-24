@@ -16,7 +16,7 @@ This goal of this project is to help speed up how radiologists review brain MRI 
 
 ### Size
 
-All 501 patients in the dataset, each with 155 MRI slices, gives 77,650 total 2D slices. Each slice includes three MRI sequences (`t1`, `t1c`, `t2`), a flag for if the slice `is_tumorous` and a segmentation mask (`tumor_mask`). Since metadata fields will be excluded (`age`, `sex`, `tumor_type`, `who_grade`) from the model inputs, the full patient data is usable as null values only occur in these columns.
+All 501 patients in the dataset, each with 155 MRI slices, gives 77,655 total 2D slices. Each slice includes three MRI sequences (`t1`, `t1c`, `t2`), a flag for if the slice `is_tumorous` and a segmentation mask (`tumor_mask`). Since metadata fields will be excluded (`age`, `sex`, `tumor_type`, `who_grade`) from the model inputs, the full patient data is usable as null values only occur in these columns.
 
 ### Train / Val / Test
 
@@ -24,7 +24,7 @@ Split by patient (`volume_id`) rather than by slice (`slice_id`) since each pati
 
 ### License / Ethics
 
-TCIA data is released for research use under its own CC by 4.0 license. No new labels are being created as they are already provided in the dataset, however deployment would require formal clinical validation and ethical review before it could be extended onto unseen MRI slices outside of the dataset.
+TCIA data is released for research use under its own CC by 4.0 license. No new labels are being created as they are already provided in the dataset. However, deployment would require formal clinical validation and ethical review before it could be extended onto unseen MRI slices outside of the dataset.
 
 |  |  |
 |-------|-----------------------------------------------------------------|
