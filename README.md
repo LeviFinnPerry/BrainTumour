@@ -53,26 +53,3 @@ All patients have a confirmed diagnosis, after removing missing values there is 
 
 [UCSF_PDGM Dataset](https://huggingface.co/datasets/chehablab/UCSF_PDGM) - Hugging Face
 
-## Baseline
-
-To find the baseline accuracy without a model: Logistic regression on flattened pixels (`t1`, `t1c`, `t2`) and patient metadata (`sex`, `age`) to predict `is_tumorous`.
-
-The baseline model will focus on classification of whether the slice is tumourous using a small ConvNet that takes the `t1`, `t1c`, `t2` MRI sequences as input channels, combined with the patient metadata (`sex`, `age`). Followed by a segmentation model using `tumor_mask`.
-
-## Metric
-
--   Classification: AUC (Area Under Curve)
-
--   Segmentation: IOU (Intersection Over Union)
-
-## Risk
-
-The primary risk is data leakage. At the patient level as each patient has 155 slices, therefore the data must be split by `volume_id` not `slice_id`. `tumor_type` and `who_grade` will be excluded from the model input features as these are consistent across whole patient information rather than on the individual slices.
-
-## Team
-
-Individual.
-
-## AI Tools
-
-I will try use a combination of LLM models including the Ollama qwen3:1.7b and trialing Claude Sonnet 5 depending on the depth of questions or errors encountered.
