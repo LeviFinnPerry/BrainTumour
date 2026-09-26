@@ -53,3 +53,14 @@ All patients have a confirmed diagnosis, after removing missing values there is 
 
 [UCSF_PDGM Dataset](https://huggingface.co/datasets/chehablab/UCSF_PDGM) - Hugging Face
 
+|  |  |
+|-------|-----------------------------------------------------------------|
+| Author | Calabrese, E. and Villanueva-Meyer, J. and Rudie, J. and Rauschecker, A. and Baid, U. and Bakas, S. and Cha, S. and Mongan, J. and Hess, C. |
+| Title | The University of California San Francisco Preoperative Diffuse Glioma MRI (UCSF-PDGM) (Version 5) \[dataset\] |
+| Year | 2022 |
+| Publisher | The Cancer Imaging Archive |
+| DOI | 10.7937/tcia.bdgf-8v37 |
+
+: Calabrese2022
+
+
