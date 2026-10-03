@@ -1,24 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_tumor(df):
-    """Plots a sample of each MRI image for a tumourous slice"""
-    sample = next(s for s in df if s["is_tumorous"])
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
-    for ax, key in zip(axes[:3], ["t1", "t1c", "t2"]):
-        ax.imshow(sample[key], cmap="gray")
-        ax.set_title(key.upper())
+def plot_tumour(x_df, y_df):
+    """Plots a sample tumourous slice from split arrays."""
+    if isinstance(y_df, np.ndarray):
+        tumour_idx = int(np.where(y_df == 1)[0][0])
+    else:
+        tumour_idx = int(np.where(y_df.to_numpy() == 1)[0][0])
+
+    sample_img = x_df[tumour_idx]
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4))
+
+    for ax, channel in zip(axes[:3], [sample_img[:, :, 0], sample_img[:, :, 1], sample_img[:, :, 2]]):
+        ax.imshow(channel, cmap="gray")
         ax.axis("off")
 
-    axes[3].imshow(sample["t1c"], cmap="gray")
-    axes[3].imshow(np.array(sample["tumor_mask"]), cmap="jet", alpha=0.4, vmin=0, vmax=4)
-    axes[3].set_title("Tumor Mask Overlay")
-    axes[3].axis("off")
-
-    fig.suptitle(
-        f"{sample['volume_id']} | Slice {sample['slice_id']} | "
-        f"{sample['tumor_type']} (WHO grade {sample['who_grade']})"
-    )
+    fig.suptitle(f"Tumourous sample index: {tumour_idx}")
     plt.tight_layout()
     plt.show()
 
@@ -29,8 +26,8 @@ def plot_training_history(history, accuracy_metric, loss_metric):
         accuracy_metric (string): accuracy metric
         loss_metric (string): loss metric"""
     _, axes = plt.subplots(1, 2, figsize=(12, 4))
-    epochs = range(1, len(history.history[accuracy_metric]) + 1)
-    best_epoch = np.argmin(history.history[loss_metric]) + 1
+    epochs = range(1, len(history.history[f"val_{accuracy_metric}"]) + 1)
+    best_epoch = np.argmax(history.history[f"val_{accuracy_metric}"]) + 1
     plot_history(history, axes, epochs, best_epoch, 0, accuracy_metric)
     plot_history(history, axes, epochs, best_epoch, 1, loss_metric)
     plt.show()

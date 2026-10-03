@@ -63,4 +63,19 @@ All patients have a confirmed diagnosis, after removing missing values there is 
 
 : Calabrese2022
 
+## Repository Structure
+```
+|-- /Tumour
+    |-- /baseline_accuracy              # Baseline accuracy models
+        |-- logistic_accuracy.ipynb     # Logistic accuracy model for classification baseline
+        |-- mask_accuracy.ipynb         # Mask accuracy model for segmentation baseline
+    |-- /methods                        # Helping methods
+        |-- load_data.py                # Loads, cleans and splits dataset into training, validation and test sets
+        |-- logistic_flatten.py         # Helping function to flatten images for logistic regression 
+        |-- visualisation.py            # Plotting functions
+    |-- /models                         # Models
+        |-- classification_model.ipynb  # Classification model                    
+    |-- requirements.txt                # Package requirements
+```
+
 
