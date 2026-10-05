@@ -4,12 +4,12 @@ from datasets import load_dataset
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
-def load_ucsf(debug=False, classification=True, basic_mask=False, image_size=32):
+def load_ucsf(debug=False, classification=True, basic_mask=True, image_size=32):
     """Loads the UCSF_PDGM dataset
     Args:
         debug (bool, optional): smaller dataset for testing. Defaults to False.
         classification (bool, optional): classification or segmentation model. Defaults to True.
-        basic_mask (bool, optional): single or multiple tumour mask pixel types. Defaults to False.
+        basic_mask (bool, optional): single or multiple tumour mask pixel types. Defaults to True.
         image_size (int, optional): size of the square image. Defaults to 32.
     Returns:
         complete split: x_train, y_train, x_val, y_val, x_test, y_test
@@ -45,7 +45,28 @@ def split_dfs(df):
     train_df = split_df(df, train_ids)
     val_df = split_df(df, val_ids)
     test_df = split_df(df, test_ids)
+    validate_dfs(train_df, val_df, test_df)
     return train_df, val_df, test_df
+
+def get_sizes(df):
+    patients = df["volume_id"].unique()
+    length = df.shape[0]
+    return patients, length
+
+def validate_dfs(train_df, val_df, test_df):
+    train_patients, train_length = get_sizes(train_df)
+    val_patients, val_length = get_sizes(val_df)
+    test_patients, test_length = get_sizes(test_df)
+    
+    if len(train_patients) * 155 != train_length:
+        print("Training size does not match patients")
+    elif len(val_patients) * 155 != val_length:
+        print("Validation size does not match patients")
+    elif len(test_patients) * 155 != test_length:
+        print("Test size does not match patients")
+    else:
+        print("No data leakage of patient ids in train, validation and test splits")
+    
 
 def split_x(df, image_size):
     """Splits the MRI images for x sets while preserving image shape."""
@@ -119,4 +140,5 @@ def split_segmentation(train_df, val_df, test_df, basic_mask=False, image_size=3
     val_df = split_tumorous(val_df)
     test_df = split_tumorous(test_df)
     return split_groups(train_df, val_df, test_df, False, basic_mask=basic_mask, image_size=image_size)
-    
+
+load_ucsf(True, True)
