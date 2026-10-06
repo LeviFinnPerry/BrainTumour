@@ -86,35 +86,61 @@ def split_x(df, image_size):
 
     return np.stack(stacked, axis=0).astype(np.float32)
 
-def split_y(df, classification, basic_mask):
+def split_y(df, classification, basic_mask, image_size):
     """Splits the predicted column"""
     if classification:
         return np.asarray(df["is_tumorous"])
     else:
-        return update_tumor_mask(df, basic_mask)
+        return update_tumor_mask(df, basic_mask, image_size)
     
-def update_tumor_mask(df, basic_mask):
-    """Updates the tumour mask so it is visually readable"""
-    if not basic_mask:
-        custom_palette = np.array([
-            [0, 0, 0],      # 0 - Background: Black
-            [0, 255, 0],    # 1 - NCR/NET: Green
-            [255, 255, 0],  # 2 - ED: Yellow
-            [0, 0, 0],      # Placeholder
-            [255, 0, 0]     # 4 - ET: Red
-        ])
-    else:
-        custom_palette = np.array([
-            [0, 0, 0],      # 0 - Background: Black
-            [0, 255, 0],    # 1 - NCR/NET: Red
-            [0, 255, 0],    # 2 - ED: Red
-            [0, 0, 0],      # Placeholder
-            [0, 255, 0]     # 4 - ET: Red
-        ])
-    
+def get_binary_tumor_mask(df, image_size):
+    """
+    Binary tumour vs. background mask, single channel.
+    Any nonzero label becomes tumour = 1.
+    """
+    label_indices = np.stack(df["tumor_mask"].values).astype(np.uint8)
+
+    binary_masks = []
+    for mask in label_indices:
+        img = Image.fromarray(mask).resize((image_size, image_size), Image.Resampling.NEAREST)
+        arr = np.array(img, dtype=np.float32)
+        arr = (arr > 0).astype(np.float32)
+        binary_masks.append(arr[..., np.newaxis])  # (H, W) -> (H, W, 1)
+
+    return np.stack(binary_masks)  # (N, H, W, 1)
+
+
+def get_multiclass_tumor_mask(df, image_size):
+    """
+    Multi-compartment RGB mask, distinguishing NCR/NET, ED, and ET.
+    """
+    custom_palette = np.array([
+        [0, 0, 0],      # 0 - Background: Black
+        [0, 255, 0],    # 1 - NCR/NET: Green
+        [255, 255, 0],  # 2 - ED: Yellow
+        [0, 0, 0],      # Placeholder
+        [255, 0, 0]     # 4 - ET: Red
+    ])
+
     label_indices = np.clip(np.stack(df["tumor_mask"].values).astype(int), 0, 4).astype(np.uint8)
     coloured_batch = custom_palette[label_indices].astype(np.uint8)
-    return pd.Series([Image.fromarray(img, mode="RGB") for img in coloured_batch])
+
+    resized_batch = []
+    for img in coloured_batch:
+        resized = Image.fromarray(img, mode="RGB").resize(
+            (image_size, image_size), Image.Resampling.NEAREST
+        )
+        resized_batch.append(np.array(resized, dtype=np.uint8))
+
+    return np.stack(resized_batch)  # (N, H, W, 3)
+
+
+def update_tumor_mask(df, basic_mask, image_size):
+    """Returns the tumour mask, binary if basic_mask, else 4 coloured."""
+    if basic_mask:
+        return get_binary_tumor_mask(df, image_size)
+    else:
+        return get_multiclass_tumor_mask(df, image_size)
     
 def split_tumorous(df):
     """Splits the dataframe to only tumourous samples"""
@@ -125,9 +151,9 @@ def split_groups(train_df, val_df, test_df, classification, basic_mask=False, im
     x_train = split_x(train_df, image_size)
     x_val = split_x(val_df, image_size)
     x_test = split_x(test_df, image_size)
-    y_train = split_y(train_df, classification, basic_mask)
-    y_val = split_y(val_df, classification, basic_mask)
-    y_test = split_y(test_df, classification, basic_mask)
+    y_train = split_y(train_df, classification, basic_mask, image_size)
+    y_val = split_y(val_df, classification, basic_mask, image_size)
+    y_test = split_y(test_df, classification, basic_mask, image_size)
     return x_train, y_train, x_val, y_val, x_test, y_test
 
 def split_classification(train_df, val_df, test_df, image_size=32):
