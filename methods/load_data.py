@@ -49,11 +49,13 @@ def split_dfs(df):
     return train_df, val_df, test_df
 
 def get_sizes(df):
+    """Gets the number of patients and size of dataframe"""
     patients = df["volume_id"].unique()
     length = df.shape[0]
     return patients, length
 
 def validate_dfs(train_df, val_df, test_df):
+    """Validates all dataframes are expected lengths for amount of patients"""
     train_patients, train_length = get_sizes(train_df)
     val_patients, val_length = get_sizes(val_df)
     test_patients, test_length = get_sizes(test_df)
@@ -102,7 +104,7 @@ def get_binary_tumor_mask(df, image_size):
 
     binary_masks = []
     for mask in label_indices:
-        img = Image.fromarray(mask).resize((image_size, image_size), Image.Resampling.NEAREST)
+        img = Image.fromarray(mask).resize((image_size, image_size), Image.Resampling.BILINEAR)
         arr = np.array(img, dtype=np.float32)
         arr = (arr > 0).astype(np.float32)
         binary_masks.append(arr[..., np.newaxis])  # (H, W) -> (H, W, 1)
@@ -128,7 +130,7 @@ def get_multiclass_tumor_mask(df, image_size):
     resized_batch = []
     for img in coloured_batch:
         resized = Image.fromarray(img, mode="RGB").resize(
-            (image_size, image_size), Image.Resampling.NEAREST
+            (image_size, image_size), Image.Resampling.BILINEAR
         )
         resized_batch.append(np.array(resized, dtype=np.uint8))
 
@@ -166,5 +168,3 @@ def split_segmentation(train_df, val_df, test_df, basic_mask=False, image_size=3
     val_df = split_tumorous(val_df)
     test_df = split_tumorous(test_df)
     return split_groups(train_df, val_df, test_df, False, basic_mask=basic_mask, image_size=image_size)
-
-load_ucsf(True, True)
