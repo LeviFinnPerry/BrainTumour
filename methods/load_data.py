@@ -102,7 +102,7 @@ def get_binary_tumor_mask(df, image_size):
 
     binary_masks = []
     for mask in label_indices:
-        img = Image.fromarray(mask).resize((image_size, image_size), Image.Resampling.NEAREST)
+        img = Image.fromarray(mask).resize((image_size, image_size), Image.Resampling.BILINEAR)
         arr = np.array(img, dtype=np.float32)
         arr = (arr > 0).astype(np.float32)
         binary_masks.append(arr[..., np.newaxis])  # (H, W) -> (H, W, 1)
@@ -128,7 +128,7 @@ def get_multiclass_tumor_mask(df, image_size):
     resized_batch = []
     for img in coloured_batch:
         resized = Image.fromarray(img, mode="RGB").resize(
-            (image_size, image_size), Image.Resampling.NEAREST
+            (image_size, image_size), Image.Resampling.BILINEAR
         )
         resized_batch.append(np.array(resized, dtype=np.uint8))
 
