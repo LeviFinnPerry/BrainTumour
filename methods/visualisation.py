@@ -15,6 +15,20 @@ def plot_tumour(x_df, y_df):
     fig.suptitle(f"Tumourous sample index: {tumour_idx}")
     plt.tight_layout()
     plt.show()
+    
+def plot_augmentation(x_train, num_samples, augmentation):
+    sample = x_train[:num_samples]
+    aug = augmentation(sample, training=True).numpy()
+    
+    _, axes = plt.subplots(2, 4, figsize=(12, 6))
+    for i in range(num_samples):
+        axes[0, i].imshow(sample[i][..., 1], cmap="gray")
+        axes[0, i].set_title("Original (t1c)")
+        axes[1, i].imshow(aug[i][..., 1], cmap="gray")
+        axes[1, i].set_title("Augmented")
+        axes[0, i].axis("off"); axes[1, i].axis("off")
+    plt.tight_layout()
+    plt.show()
 
 def plot_training_history(history, accuracy_metric, loss_metric):
     """Plots the training history for given accuracy and loss metric
@@ -48,16 +62,15 @@ def compute_iou(pred, true):
     union = np.logical_or(pred, true).sum()
     return intersection / union if union > 0 else 1.0    
     
-def plot_segmentation_prediction(x, y_true, model, n_samples=4, threshold=0.5, binary=True):
+def plot_binary_segmentation_prediction(x, y_true, model, n_samples=4, threshold=0.5):
     """Plots each MRI image (t1, t1c, t2), the tumour_mask and the prediction with the computed IoU"""
     indices = np.random.choice(len(x), size=n_samples, replace=False)
     y_pred = model.predict(x[indices])
-    if binary:
-        y_pred_outcome = (y_pred > threshold).astype(np.float32)
+    y_pred_outcome = (y_pred > threshold).astype(np.float32)
     
     _, axes = plt.subplots(n_samples, 5, figsize=(15, n_samples * 3))
     for i, idx in enumerate(indices):
-        iou = compute_iou(y_pred[i].squeeze(), y_true[idx].squeeze())
+        iou = compute_iou(y_pred_outcome[i].squeeze(), y_true[idx].squeeze())
         axes[i, 0].imshow(x[idx][..., 0], cmap="grey")
         axes[i, 0].set_title("t1")
         axes[i, 0].axis("off")
