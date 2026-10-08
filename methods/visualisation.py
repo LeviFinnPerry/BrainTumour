@@ -16,17 +16,33 @@ def plot_tumour(x_df, y_df):
     plt.tight_layout()
     plt.show()
     
-def plot_augmentation(x_train, num_samples, augmentation):
-    sample = x_train[:num_samples]
-    aug = augmentation(sample, training=True).numpy()
-    
-    _, axes = plt.subplots(2, 4, figsize=(12, 6))
+def plot_augmentation(x_train, y_train, num_samples, augmentation):
+    tumour_idxs = np.where(np.asarray(y_train) == 1)[0]
+    sample_indices = np.random.choice(tumour_idxs, size=num_samples, replace=False)
+
+    samples = x_train.iloc[sample_indices] if hasattr(x_train, "iloc") else np.asarray(x_train)[sample_indices]
+    aug = augmentation(samples, training=True)
+    if hasattr(aug, "numpy"):
+        aug = aug.numpy()
+    aug = np.asarray(aug)
+
+    _, axes = plt.subplots(num_samples, 6, figsize=(num_samples * 3.5, 8))
+    axes = np.asarray(axes).reshape(num_samples, 6)
     for i in range(num_samples):
-        axes[0, i].imshow(sample[i][..., 1], cmap="gray")
-        axes[0, i].set_title("Original (t1c)")
-        axes[1, i].imshow(aug[i][..., 1], cmap="gray")
-        axes[1, i].set_title("Augmented")
-        axes[0, i].axis("off"); axes[1, i].axis("off")
+        axes[i, 0].imshow(samples[i][..., 0], cmap="gray")
+        axes[i, 0].set_title("Original (t1)")
+        axes[i, 1].imshow(samples[i][..., 1], cmap="gray")
+        axes[i, 1].set_title("Original (t1c)")
+        axes[i, 2].imshow(samples[i][..., 2], cmap="gray")
+        axes[i, 2].set_title("Original (t2)")
+        axes[i, 3].imshow(aug[i][..., 0], cmap="gray")
+        axes[i, 3].set_title("Augmented (t1)")
+        axes[i, 4].imshow(aug[i][..., 1], cmap="gray")
+        axes[i, 4].set_title("Augmented (t1c)")
+        axes[i, 5].imshow(aug[i][..., 2], cmap="gray")
+        axes[i, 5].set_title("Augmented (t2)")
+        for row in range(6):
+            axes[i, row].axis("off")
     plt.tight_layout()
     plt.show()
 
