@@ -109,5 +109,30 @@ def plot_binary_segmentation_prediction(x, y_true, model, n_samples=4, threshold
         
     plt.tight_layout()
     plt.show()
-        
-        
+
+def iou_counts(pred, true):
+    pred = pred.reshape(len(pred), -1).astype(bool)
+    true = true.reshape(len(true), -1).astype(bool)
+    return (pred & true).sum(axis=1), (pred | true).sum(axis=1)
+
+def plot_pipeline_examples(x, true_masks, class_proba, pred_masks, indices, labels):
+    _, axes = plt.subplots(len(indices), 5, figsize=(15, 3 * len(indices)))
+    axes = np.atleast_2d(axes)
+    for row, (i, label) in enumerate(zip(indices, labels)):
+        inter, union = iou_counts(pred_masks[i:i + 1], true_masks[i:i + 1])
+        iou = inter[0] / union[0] if union[0] > 0 else float("nan")
+        axes[row, 0].imshow(x[i][..., 0], cmap="grey")
+        axes[row, 0].set_title("t1")
+        axes[row, 1].imshow(x[i][..., 1], cmap="grey")
+        axes[row, 1].set_title("t1c")
+        axes[row, 2].imshow(x[i][..., 2], cmap="grey")
+        axes[row, 2].set_title("t2")
+        axes[row, 3].imshow(true_masks[i].squeeze(), cmap="grey")
+        axes[row, 3].set_title(f"{label}\nTumour Mask")
+        axes[row, 4].imshow(pred_masks[i].squeeze(), cmap="grey")
+        axes[row, 4].set_title(f"Prediction (p={class_proba[i]:.2f})\nIoU: {iou:.3f}")
+        for ax in axes[row]:
+            ax.axis("off")
+    plt.tight_layout()
+    plt.show()
+
