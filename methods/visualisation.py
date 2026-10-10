@@ -120,7 +120,7 @@ def plot_pipeline_examples(x, true_masks, class_proba, pred_masks, indices, labe
     axes = np.atleast_2d(axes)
     for row, (i, label) in enumerate(zip(indices, labels)):
         inter, union = iou_counts(pred_masks[i:i + 1], true_masks[i:i + 1])
-        iou = inter[0] / union[0] if union[0] > 0 else float("nan")
+        iou_label = f"IoU: {inter[0] / union[0]:.3f}" if union[0] > 0 else "IoU: N/A (both masks empty)"
         axes[row, 0].imshow(x[i][..., 0], cmap="grey")
         axes[row, 0].set_title("t1")
         axes[row, 1].imshow(x[i][..., 1], cmap="grey")
@@ -130,9 +130,8 @@ def plot_pipeline_examples(x, true_masks, class_proba, pred_masks, indices, labe
         axes[row, 3].imshow(true_masks[i].squeeze(), cmap="grey")
         axes[row, 3].set_title(f"{label}\nTumour Mask")
         axes[row, 4].imshow(pred_masks[i].squeeze(), cmap="grey")
-        axes[row, 4].set_title(f"Prediction (p={class_proba[i]:.2f})\nIoU: {iou:.3f}")
+        axes[row, 4].set_title(f"Prediction (p={class_proba[i]:.2f})\n{iou_label}")
         for ax in axes[row]:
             ax.axis("off")
     plt.tight_layout()
     plt.show()
-
